@@ -1,6 +1,7 @@
 package apperr
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -24,6 +25,15 @@ type AppError struct {
 	httpStatusCode *int
 	code           *int
 	publicMsg      *string
+}
+
+func New(text, logMsg string, opts ...option) *AppError {
+	appErr := &AppError{
+		err:        errors.New(text),
+		logMsg:     logMsg,
+		stackTrace: getCallerStackTraceWithLog(logMsg),
+	}
+	return appErr.With(opts...)
 }
 
 func Wrap(err error, logMsgFormat string, args ...interface{}) *AppError {
