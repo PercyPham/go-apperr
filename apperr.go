@@ -10,9 +10,9 @@ import (
 const (
 	CodeUndefined = 0
 
-	defaultHttpStatusCode = http.StatusOK
+	defaultHttpStatusCode = http.StatusInternalServerError
 	defaultCode           = CodeUndefined
-	defaultPublicMsg      = "internal server error"
+	defaultPublicMsg      = "Internal Server Error"
 )
 
 type AppError struct {
