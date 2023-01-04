@@ -3,6 +3,8 @@ package apperr
 import (
 	"fmt"
 	"net/http"
+	"runtime/debug"
+	"strings"
 )
 
 const (
@@ -27,8 +29,10 @@ type AppError interface {
 var _ AppError = (*appError)(nil)
 
 type appError struct {
-	err    error
-	logMsg string
+	err error
+
+	logMsg     string
+	stackTrace string
 
 	httpStatusCode *int
 	code           *int
@@ -39,10 +43,21 @@ func Wrap(err error, logMsgFormat string, args ...interface{}) *appError {
 	if err == nil {
 		return nil
 	}
+	logMsg := fmt.Sprintf(logMsgFormat, args...)
+	stackTrace := getCallerStackTraceWithLog(logMsg)
 	return &appError{
-		err:    err,
-		logMsg: fmt.Sprintf(logMsgFormat, args...),
+		err:        err,
+		logMsg:     logMsg,
+		stackTrace: stackTrace,
 	}
+}
+
+func getCallerStackTraceWithLog(logMsg string) string {
+	stack := strings.Split(string(debug.Stack()), "\n")
+	callerMethod := stack[7]
+	callerTraceRaw := stack[8]
+	callerTrace := strings.Split(strings.TrimSpace(callerTraceRaw), " ")[0]
+	return fmt.Sprintf("%s\n\t%s\n\t%s", callerMethod, logMsg, callerTrace)
 }
 
 func (ae *appError) With(opts ...option) *appError {
@@ -53,6 +68,15 @@ func (ae *appError) With(opts ...option) *appError {
 		opt.apply(ae)
 	}
 	return ae
+}
+
+func (ae *appError) StackTrace() string {
+	stack := ""
+	if nestedAppErr, ok := ae.err.(*appError); ok {
+		stack = nestedAppErr.StackTrace() + "\n"
+	}
+	stack += ae.stackTrace
+	return stack
 }
 
 func (ae *appError) Error() string {
