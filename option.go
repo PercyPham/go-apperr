@@ -3,7 +3,7 @@ package apperr
 import "fmt"
 
 type option interface {
-	apply(*appError)
+	apply(*AppError)
 }
 
 func PredefineOptions(opts ...option) option {
@@ -12,7 +12,7 @@ func PredefineOptions(opts ...option) option {
 
 type predefinedOptions []option
 
-func (p predefinedOptions) apply(ae *appError) {
+func (p predefinedOptions) apply(ae *AppError) {
 	for _, opt := range p {
 		opt.apply(ae)
 	}
@@ -24,7 +24,7 @@ func HTTPStatusCode(code int) option {
 
 type httpStatusCodeOption int
 
-func (h httpStatusCodeOption) apply(ae *appError) {
+func (h httpStatusCodeOption) apply(ae *AppError) {
 	httpStatusCode := int(h)
 	ae.httpStatusCode = &httpStatusCode
 }
@@ -35,7 +35,7 @@ func Code(code int) option {
 
 type codeOption int
 
-func (o codeOption) apply(ae *appError) {
+func (o codeOption) apply(ae *AppError) {
 	code := int(o)
 	ae.code = &code
 }
@@ -47,7 +47,7 @@ func PublicMessage(format string, args ...interface{}) option {
 
 type publicMsgOption string
 
-func (p publicMsgOption) apply(ae *appError) {
+func (p publicMsgOption) apply(ae *AppError) {
 	publicMsg := string(p)
 	ae.publicMsg = &publicMsg
 }

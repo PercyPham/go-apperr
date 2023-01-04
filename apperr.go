@@ -15,20 +15,7 @@ const (
 	defaultPublicMsg      = "internal server error"
 )
 
-type AppError interface {
-	error
-
-	// support go1.13 error functions: Is & As
-	Unwrap() error
-
-	HTTPStatusCode() int
-	Code() int
-	PublicMessage() string
-}
-
-var _ AppError = (*appError)(nil)
-
-type appError struct {
+type AppError struct {
 	err error
 
 	logMsg     string
@@ -39,13 +26,13 @@ type appError struct {
 	publicMsg      *string
 }
 
-func Wrap(err error, logMsgFormat string, args ...interface{}) *appError {
+func Wrap(err error, logMsgFormat string, args ...interface{}) *AppError {
 	if err == nil {
 		return nil
 	}
 	logMsg := fmt.Sprintf(logMsgFormat, args...)
 	stackTrace := getCallerStackTraceWithLog(logMsg)
-	return &appError{
+	return &AppError{
 		err:        err,
 		logMsg:     logMsg,
 		stackTrace: stackTrace,
@@ -60,7 +47,7 @@ func getCallerStackTraceWithLog(logMsg string) string {
 	return fmt.Sprintf("%s\n\t%s\n\t%s", callerMethod, logMsg, callerTrace)
 }
 
-func (ae *appError) With(opts ...option) *appError {
+func (ae *AppError) With(opts ...option) *AppError {
 	if ae == nil {
 		return nil
 	}
@@ -70,50 +57,51 @@ func (ae *appError) With(opts ...option) *appError {
 	return ae
 }
 
-func (ae *appError) StackTrace() string {
+func (ae *AppError) StackTrace() string {
 	stack := ""
-	if nestedAppErr, ok := ae.err.(*appError); ok {
+	if nestedAppErr, ok := ae.err.(*AppError); ok {
 		stack = nestedAppErr.StackTrace() + "\n"
 	}
 	stack += ae.stackTrace
 	return stack
 }
 
-func (ae *appError) Error() string {
+func (ae *AppError) Error() string {
 	return ae.logMsg + ": " + ae.err.Error()
 }
 
-func (ae *appError) Unwrap() error {
+// support go1.13 error functions: Is & As
+func (ae *AppError) Unwrap() error {
 	return ae.err
 }
 
-func (ae *appError) HTTPStatusCode() int {
+func (ae *AppError) HTTPStatusCode() int {
 	if ae.httpStatusCode != nil {
 		return *ae.httpStatusCode
 	}
-	nestedAppErr, ok := ae.err.(*appError)
+	nestedAppErr, ok := ae.err.(*AppError)
 	if !ok {
 		return defaultHttpStatusCode
 	}
 	return nestedAppErr.HTTPStatusCode()
 }
 
-func (ae *appError) Code() int {
+func (ae *AppError) Code() int {
 	if ae.code != nil {
 		return *ae.code
 	}
-	nestedAppErr, ok := ae.err.(*appError)
+	nestedAppErr, ok := ae.err.(*AppError)
 	if !ok {
 		return defaultCode
 	}
 	return nestedAppErr.Code()
 }
 
-func (ae *appError) PublicMessage() string {
+func (ae *AppError) PublicMessage() string {
 	if ae.publicMsg != nil {
 		return *ae.publicMsg
 	}
-	nestedAppErr, ok := ae.err.(*appError)
+	nestedAppErr, ok := ae.err.(*AppError)
 	if !ok {
 		return defaultPublicMsg
 	}
