@@ -27,7 +27,7 @@ type AppError struct {
 	publicMsg      *string
 }
 
-func New(text, logMsg string, opts ...option) *AppError {
+func New(text, logMsg string, opts ...Option) *AppError {
 	appErr := &AppError{
 		err:        errors.New(text),
 		logMsg:     logMsg,
@@ -36,7 +36,18 @@ func New(text, logMsg string, opts ...option) *AppError {
 	return appErr.With(opts...)
 }
 
-func Wrap(err error, logMsgFormat string, args ...interface{}) *AppError {
+func Wrap(err error, logMsg string) *AppError {
+	if err == nil {
+		return nil
+	}
+	return &AppError{
+		err:        err,
+		logMsg:     logMsg,
+		stackTrace: getCallerStackTraceWithLog(logMsg),
+	}
+}
+
+func Wrapf(err error, logMsgFormat string, args ...any) *AppError {
 	if err == nil {
 		return nil
 	}
@@ -57,7 +68,7 @@ func getCallerStackTraceWithLog(logMsg string) string {
 	return fmt.Sprintf("%s\n\t%s\n\t%s", callerMethod, logMsg, callerTrace)
 }
 
-func (ae *AppError) With(opts ...option) *AppError {
+func (ae *AppError) With(opts ...Option) *AppError {
 	if ae == nil {
 		return nil
 	}

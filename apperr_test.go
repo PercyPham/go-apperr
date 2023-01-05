@@ -17,7 +17,7 @@ func TestWrapError(t *testing.T) {
 
 	t.Run("wrap normal error", func(t *testing.T) {
 		err := errors.New("err msg")
-		appErr := apperr.Wrap(err, "do %s", "something")
+		appErr := apperr.Wrapf(err, "do %s", "something")
 
 		if appErr == nil {
 			t.Fatalf("expected AppError, got nil")

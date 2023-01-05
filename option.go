@@ -2,23 +2,23 @@ package apperr
 
 import "fmt"
 
-type option interface {
+type Option interface {
 	apply(*AppError)
 }
 
-func PredefineOptions(opts ...option) option {
-	return predefinedOptions(opts)
+func GroupOptions(opts ...Option) Option {
+	return optionGroup(opts)
 }
 
-type predefinedOptions []option
+type optionGroup []Option
 
-func (p predefinedOptions) apply(ae *AppError) {
-	for _, opt := range p {
+func (g optionGroup) apply(ae *AppError) {
+	for _, opt := range g {
 		opt.apply(ae)
 	}
 }
 
-func HTTPStatusCode(code int) option {
+func HTTPStatusCode(code int) Option {
 	return httpStatusCodeOption(code)
 }
 
@@ -29,7 +29,7 @@ func (h httpStatusCodeOption) apply(ae *AppError) {
 	ae.httpStatusCode = &httpStatusCode
 }
 
-func Code(code int) option {
+func Code(code int) Option {
 	return codeOption(code)
 }
 
@@ -40,7 +40,11 @@ func (o codeOption) apply(ae *AppError) {
 	ae.code = &code
 }
 
-func PublicMessage(format string, args ...interface{}) option {
+func PublicMessage(text string, args ...any) Option {
+	return publicMsgOption(text)
+}
+
+func PublicMessagef(format string, args ...any) Option {
 	publicMsg := fmt.Sprintf(format, args...)
 	return publicMsgOption(publicMsg)
 }
