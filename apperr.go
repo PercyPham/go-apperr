@@ -16,17 +16,6 @@ const (
 	defaultPublicMsg      = "Internal Server Error"
 )
 
-type AppError struct {
-	err error
-
-	logMsg     string
-	stackTrace string
-
-	httpStatusCode *int
-	code           *int
-	publicMsg      *string
-}
-
 func New(text, logMsg string, opts ...Option) *AppError {
 	appErr := &AppError{
 		err:        errors.New(text),
@@ -66,6 +55,25 @@ func getCallerStackTraceWithLog(logMsg string) string {
 	callerTraceRaw := stack[8]
 	callerTrace := strings.Split(strings.TrimSpace(callerTraceRaw), " ")[0]
 	return fmt.Sprintf("%s\n\t%s\n\t%s", callerMethod, logMsg, callerTrace)
+}
+
+func RootError(err error) error {
+	appErr, ok := err.(*AppError)
+	if !ok {
+		return err
+	}
+	return RootError(appErr.err)
+}
+
+type AppError struct {
+	err error
+
+	logMsg     string
+	stackTrace string
+
+	httpStatusCode *int
+	code           *int
+	publicMsg      *string
 }
 
 func (ae *AppError) With(opts ...Option) *AppError {

@@ -44,3 +44,34 @@ func TestWrapError(t *testing.T) {
 		}
 	})
 }
+
+func TestRootError(t *testing.T) {
+	t.Run("root err of nil", func(t *testing.T) {
+		appErr := apperr.RootError(nil)
+
+		if appErr != nil {
+			t.Errorf("expected nil, got %v", appErr)
+		}
+	})
+
+	t.Run("root err of normal err", func(t *testing.T) {
+		err := errors.New("root err")
+
+		rootErr := apperr.RootError(err)
+
+		if rootErr != err {
+			t.Errorf("expected '%v', got '%v'", err, rootErr)
+		}
+	})
+
+	t.Run("root err of appErr", func(t *testing.T) {
+		err := errors.New("root err")
+		appErr := apperr.Wrap(err, "do something")
+
+		rootErr := apperr.RootError(appErr)
+
+		if rootErr != err {
+			t.Errorf("expected '%v', got '%v'", err, rootErr)
+		}
+	})
+}
