@@ -29,14 +29,14 @@ func (h httpStatusCodeOption) apply(ae *AppError) {
 	ae.httpStatusCode = &httpStatusCode
 }
 
-func Code(code int) Option {
+func Code(code string) Option {
 	return codeOption(code)
 }
 
-type codeOption int
+type codeOption string
 
 func (o codeOption) apply(ae *AppError) {
-	code := int(o)
+	code := string(o)
 	ae.code = &code
 }
 

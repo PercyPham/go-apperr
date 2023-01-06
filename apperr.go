@@ -9,10 +9,8 @@ import (
 )
 
 const (
-	CodeUndefined = 0
-
 	defaultHttpStatusCode = http.StatusInternalServerError
-	defaultCode           = CodeUndefined
+	defaultCode           = "InternalServerError"
 	defaultPublicMsg      = "Internal Server Error"
 )
 
@@ -72,7 +70,7 @@ type AppError struct {
 	stackTrace string
 
 	httpStatusCode *int
-	code           *int
+	code           *string
 	publicMsg      *string
 }
 
@@ -115,7 +113,7 @@ func (ae *AppError) HTTPStatusCode() int {
 	return nestedAppErr.HTTPStatusCode()
 }
 
-func (ae *AppError) Code() int {
+func (ae *AppError) Code() string {
 	if ae.code != nil {
 		return *ae.code
 	}
