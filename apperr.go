@@ -55,14 +55,6 @@ func getCallerStackTraceWithLog(logMsg string) string {
 	return fmt.Sprintf("%s\n\t%s\n\t%s", callerMethod, logMsg, callerTrace)
 }
 
-func RootError(err error) error {
-	appErr, ok := err.(*AppError)
-	if !ok {
-		return err
-	}
-	return RootError(appErr.err)
-}
-
 type AppError struct {
 	err error
 
@@ -88,6 +80,8 @@ func (ae *AppError) StackTrace() string {
 	stack := ""
 	if nestedAppErr, ok := ae.err.(*AppError); ok {
 		stack = nestedAppErr.StackTrace() + "\n"
+	} else {
+		stack += "Error: " + ae.err.Error() + "\n"
 	}
 	stack += ae.stackTrace
 	return stack
