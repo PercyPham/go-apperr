@@ -17,6 +17,18 @@ func OutmostExtraInfo(err error, key string) (extraInfo any) {
 	return extraInfo
 }
 
+func GroupExtraInfos(extraInfos ...ExtraInfoSetter) ExtraInfoSetter {
+	return extraInfoSetterGroup(extraInfos)
+}
+
+type extraInfoSetterGroup []ExtraInfoSetter
+
+func (g extraInfoSetterGroup) setExtraInfo(e *WrappedError) {
+	for _, setter := range g {
+		setter.setExtraInfo(e)
+	}
+}
+
 func ExtraInfo(key string, val any) ExtraInfoSetter {
 	return &extraInfoSetter{key: key, val: val}
 }
