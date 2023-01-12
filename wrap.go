@@ -32,12 +32,12 @@ type WrappedError struct {
 	logMsg     string
 	stackTrace string
 
-	extraInfoMap map[string]any
+	infoMap map[string]any
 }
 
-func (e *WrappedError) With(extraInfos ...ExtraInfoSetter) *WrappedError {
-	for _, extraInfoSetter := range extraInfos {
-		extraInfoSetter.setExtraInfo(e)
+func (e *WrappedError) With(infos ...InfoSetter) *WrappedError {
+	for _, infoSetter := range infos {
+		infoSetter.setInfo(e)
 	}
 	return e
 }
