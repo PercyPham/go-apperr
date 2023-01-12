@@ -39,6 +39,11 @@ func (e *operationalError) setInfo(key string, val any) {
 	e.infoMap[key] = val
 }
 
+func (e *operationalError) info(key string) (any, bool) {
+	val, ok := e.infoMap[key]
+	return val, ok
+}
+
 func (e *operationalError) Unwrap() error {
 	return errOperational
 }

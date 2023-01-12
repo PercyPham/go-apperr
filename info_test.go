@@ -27,6 +27,18 @@ func TestInfo(t *testing.T) {
 		}
 	})
 
+	t.Run("info set in operation err", func(t *testing.T) {
+		key, val := "key", "val"
+		err := apperr.New("op err").With(apperr.Info(key, val))
+		wrappedErr := apperr.Wrap(err, "do something")
+
+		info := apperr.OutmostInfo(wrappedErr, key)
+
+		if info != val {
+			t.Errorf("expected '%v', got '%v'", val, info)
+		}
+	})
+
 	t.Run("exist info", func(t *testing.T) {
 		key, val := "key", "val"
 		outmostVal := "outmost val"

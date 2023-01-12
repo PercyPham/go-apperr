@@ -6,11 +6,13 @@ func OutmostInfo(err error, key string) (info any) {
 	if err == nil {
 		return nil
 	}
-	wrappedErr, ok := err.(*wrappedError)
+	infoGettable, ok := err.(interface {
+		info(key string) (val any, ok bool)
+	})
 	if !ok {
 		return nil
 	}
-	info, ok = wrappedErr.infoMap[key]
+	info, ok = infoGettable.info(key)
 	if !ok {
 		return OutmostInfo(errors.Unwrap(err), key)
 	}

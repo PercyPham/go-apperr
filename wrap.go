@@ -49,6 +49,11 @@ func (e *wrappedError) setInfo(key string, val any) {
 	e.infoMap[key] = val
 }
 
+func (e *wrappedError) info(key string) (any, bool) {
+	val, ok := e.infoMap[key]
+	return val, ok
+}
+
 func (e *wrappedError) Error() string {
 	return e.logMsg + ": " + e.err.Error()
 }
