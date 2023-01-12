@@ -4,29 +4,29 @@ import (
 	"fmt"
 )
 
-func Wrap(err error, logMsg string) *WrappedError {
+func Wrap(err error, logMsg string) *wrappedError {
 	if err == nil {
 		return nil
 	}
-	return &WrappedError{
+	return &wrappedError{
 		err:        err,
 		logMsg:     logMsg,
 		stackTrace: getCallerStackTrace(),
 	}
 }
 
-func Wrapf(err error, logMsgFormat string, args ...any) *WrappedError {
+func Wrapf(err error, logMsgFormat string, args ...any) *wrappedError {
 	if err == nil {
 		return nil
 	}
-	return &WrappedError{
+	return &wrappedError{
 		err:        err,
 		logMsg:     fmt.Sprintf(logMsgFormat, args...),
 		stackTrace: getCallerStackTrace(),
 	}
 }
 
-type WrappedError struct {
+type wrappedError struct {
 	err error
 
 	logMsg     string
@@ -35,21 +35,31 @@ type WrappedError struct {
 	infoMap map[string]any
 }
 
-func (e *WrappedError) With(infos ...InfoSetter) *WrappedError {
+func (e *wrappedError) With(infos ...InfoSetter) *wrappedError {
 	for _, infoSetter := range infos {
 		infoSetter.setInfo(e)
 	}
 	return e
 }
 
-func (e *WrappedError) Error() string {
+func (e *wrappedError) setInfo(key string, val any) {
+	if e.infoMap == nil {
+		e.infoMap = map[string]any{}
+	}
+	e.infoMap[key] = val
+}
+
+func (e *wrappedError) Error() string {
 	return e.logMsg + ": " + e.err.Error()
 }
 
-func (e *WrappedError) StackTrace() string {
-	return e.logMsg + "\n\t" + e.stackTrace
+func (e *wrappedError) StackTrace() string {
+	if len(e.infoMap) > 0 {
+		return fmt.Sprintf("%s | %s\n\t%s", e.logMsg, serializeInfoMap(e.infoMap), e.stackTrace)
+	}
+	return fmt.Sprintf("%s\n\t%s", e.logMsg, e.stackTrace)
 }
 
-func (e *WrappedError) Unwrap() error {
+func (e *wrappedError) Unwrap() error {
 	return e.err
 }

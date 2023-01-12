@@ -29,13 +29,14 @@ func TestInfo(t *testing.T) {
 
 	t.Run("exist info", func(t *testing.T) {
 		key, val := "key", "val"
-		err := errors.New("err")
-		wrappedErr := apperr.Wrap(err, "do something").With(apperr.Info(key, val))
+		outmostVal := "outmost val"
+		err := apperr.New("err").With(apperr.Info(key, val))
+		wrappedErr := apperr.Wrap(err, "do something").With(apperr.Info(key, outmostVal))
 
 		info := apperr.OutmostInfo(wrappedErr, key)
 
-		if info != val {
-			t.Errorf("expected '%v', got '%v'", val, info)
+		if info != outmostVal {
+			t.Errorf("expected '%v', got '%v'", outmostVal, info)
 		}
 	})
 

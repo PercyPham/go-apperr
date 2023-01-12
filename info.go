@@ -6,7 +6,7 @@ func OutmostInfo(err error, key string) (info any) {
 	if err == nil {
 		return nil
 	}
-	wrappedErr, ok := err.(*WrappedError)
+	wrappedErr, ok := err.(*wrappedError)
 	if !ok {
 		return nil
 	}
@@ -23,7 +23,7 @@ func GroupInfos(infos ...InfoSetter) InfoSetter {
 
 type infoSetterGroup []InfoSetter
 
-func (g infoSetterGroup) setInfo(e *WrappedError) {
+func (g infoSetterGroup) setInfo(e infoSettable) {
 	for _, setter := range g {
 		setter.setInfo(e)
 	}
@@ -38,13 +38,14 @@ type infoSetter struct {
 	val any
 }
 
-func (s *infoSetter) setInfo(e *WrappedError) {
-	if e.infoMap == nil {
-		e.infoMap = make(map[string]any)
-	}
-	e.infoMap[s.key] = s.val
+func (s *infoSetter) setInfo(e infoSettable) {
+	e.setInfo(s.key, s.val)
 }
 
 type InfoSetter interface {
-	setInfo(*WrappedError)
+	setInfo(infoSettable)
+}
+
+type infoSettable interface {
+	setInfo(key string, val any)
 }
