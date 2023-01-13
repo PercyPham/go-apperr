@@ -40,3 +40,22 @@ type InfoSetter func(infoSettable)
 type infoSettable interface {
 	setInfo(key string, val any)
 }
+
+var _ infoSettable = (*infoSetGetter)(nil)
+var _ infoGettable = (*infoSetGetter)(nil)
+
+type infoSetGetter struct {
+	infoMap map[string]any
+}
+
+func (i *infoSetGetter) setInfo(key string, val any) {
+	if i.infoMap == nil {
+		i.infoMap = make(map[string]any)
+	}
+	i.infoMap[key] = val
+}
+
+func (i *infoSetGetter) info(key string) (any, bool) {
+	val, ok := i.infoMap[key]
+	return val, ok
+}

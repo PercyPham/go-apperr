@@ -32,7 +32,7 @@ type wrappedError struct {
 	logMsg     string
 	stackTrace string
 
-	infoMap map[string]any
+	infoSetGetter
 }
 
 func (e *wrappedError) With(infos ...InfoSetter) *wrappedError {
@@ -40,18 +40,6 @@ func (e *wrappedError) With(infos ...InfoSetter) *wrappedError {
 		setInfo(e)
 	}
 	return e
-}
-
-func (e *wrappedError) setInfo(key string, val any) {
-	if e.infoMap == nil {
-		e.infoMap = map[string]any{}
-	}
-	e.infoMap[key] = val
-}
-
-func (e *wrappedError) info(key string) (any, bool) {
-	val, ok := e.infoMap[key]
-	return val, ok
 }
 
 func (e *wrappedError) Error() string {

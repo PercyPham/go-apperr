@@ -22,7 +22,7 @@ type operationalError struct {
 	text       string
 	stackTrace string
 
-	infoMap map[string]any
+	infoSetGetter
 }
 
 func (e *operationalError) With(infos ...InfoSetter) *operationalError {
@@ -30,18 +30,6 @@ func (e *operationalError) With(infos ...InfoSetter) *operationalError {
 		setInfo(e)
 	}
 	return e
-}
-
-func (e *operationalError) setInfo(key string, val any) {
-	if e.infoMap == nil {
-		e.infoMap = map[string]any{}
-	}
-	e.infoMap[key] = val
-}
-
-func (e *operationalError) info(key string) (any, bool) {
-	val, ok := e.infoMap[key]
-	return val, ok
 }
 
 func (e *operationalError) Unwrap() error {
