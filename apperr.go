@@ -26,8 +26,8 @@ type operationalError struct {
 }
 
 func (e *operationalError) With(infos ...InfoSetter) *operationalError {
-	for _, infoSetter := range infos {
-		infoSetter.setInfo(e)
+	for _, setInfo := range infos {
+		setInfo(e)
 	}
 	return e
 }

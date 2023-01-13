@@ -6,47 +6,36 @@ func OutmostInfo(err error, key string) (info any) {
 	if err == nil {
 		return nil
 	}
-	infoGettable, ok := err.(interface {
-		info(key string) (val any, ok bool)
-	})
+	infoGetter, ok := err.(infoGettable)
 	if !ok {
 		return nil
 	}
-	info, ok = infoGettable.info(key)
+	info, ok = infoGetter.info(key)
 	if !ok {
 		return OutmostInfo(errors.Unwrap(err), key)
 	}
 	return info
 }
 
-func GroupInfos(infos ...InfoSetter) InfoSetter {
-	return infoSetterGroup(infos)
+type infoGettable interface {
+	info(key string) (val any, ok bool)
 }
 
-type infoSetterGroup []InfoSetter
-
-func (g infoSetterGroup) setInfo(e infoSettable) {
-	for _, setter := range g {
-		setter.setInfo(e)
+func GroupInfos(infos ...InfoSetter) InfoSetter {
+	return func(i infoSettable) {
+		for _, setInfo := range infos {
+			setInfo(i)
+		}
 	}
 }
 
 func Info(key string, val any) InfoSetter {
-	return &infoSetter{key: key, val: val}
+	return func(i infoSettable) {
+		i.setInfo(key, val)
+	}
 }
 
-type infoSetter struct {
-	key string
-	val any
-}
-
-func (s *infoSetter) setInfo(e infoSettable) {
-	e.setInfo(s.key, s.val)
-}
-
-type InfoSetter interface {
-	setInfo(infoSettable)
-}
+type InfoSetter func(infoSettable)
 
 type infoSettable interface {
 	setInfo(key string, val any)

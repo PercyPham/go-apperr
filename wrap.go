@@ -36,8 +36,8 @@ type wrappedError struct {
 }
 
 func (e *wrappedError) With(infos ...InfoSetter) *wrappedError {
-	for _, infoSetter := range infos {
-		infoSetter.setInfo(e)
+	for _, setInfo := range infos {
+		setInfo(e)
 	}
 	return e
 }
