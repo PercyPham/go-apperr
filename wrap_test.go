@@ -8,10 +8,45 @@ import (
 )
 
 func TestWrapNil(t *testing.T) {
-	wrappedErr := apperr.Wrap(nil, "do something")
-	if wrappedErr != nil {
-		t.Errorf("expected nil, got '%v'", wrappedErr)
-	}
+	t.Run("apperr.Wrap", func(t *testing.T) {
+		wrappedErr := apperr.Wrap(nil, "do something")
+		if wrappedErr == nil {
+			t.Fatal("expected not nil, got nil")
+		}
+
+		t.Run("is not operational error", func(t *testing.T) {
+			if apperr.IsOperational(wrappedErr) {
+				t.Error("expected not to be operational error")
+			}
+		})
+		t.Run("correct err msg", func(t *testing.T) {
+			expected := "do something: wrapping nil error"
+			actual := wrappedErr.Error()
+			if actual != expected {
+				t.Errorf("expected '%v', got '%v'", expected, actual)
+			}
+		})
+	})
+
+	t.Run("apperr.Wrapf", func(t *testing.T) {
+		wrappedErr := apperr.Wrapf(nil, "do %s", "something")
+		if wrappedErr == nil {
+			t.Fatal("expected not nil, got nil")
+		}
+
+		t.Run("is not operational error", func(t *testing.T) {
+			if apperr.IsOperational(wrappedErr) {
+				t.Error("expected not to be operational error")
+			}
+		})
+		t.Run("correct err msg", func(t *testing.T) {
+			expected := "do something: wrapping nil error"
+			actual := wrappedErr.Error()
+			if actual != expected {
+				t.Errorf("expected '%v', got '%v'", expected, actual)
+			}
+		})
+	})
 }
 
 func TestWrapProgrammerError(t *testing.T) {
